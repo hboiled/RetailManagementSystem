@@ -19,6 +19,8 @@ namespace RMS_DESKTOP_UI
 
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
+            // Inits base view model with corresponding view, 
+            // whose ctor must be parameterless (the one with initialize method call)
             DisplayRootViewFor<ShellViewModel>();
         }
 
