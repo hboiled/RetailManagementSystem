@@ -1,22 +1,26 @@
-﻿using RMS_DESKTOP_UI.Models;
+﻿using RMS_DESKTOP_UI.Library.Models;
+using RMS_DESKTOP_UI.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RMS_DESKTOP_UI.Helpers
+namespace RMS_DESKTOP_UI.Library.Api
 {
     public class APIHelper : IAPIHelper
     {
+        private ILoggedInUserModel _loggedInUser;
         private HttpClient apiClient { get; set; }
 
-        public APIHelper()
+        public APIHelper(ILoggedInUserModel loggedInUser)
         {
             InitializeClient();
+            _loggedInUser = loggedInUser;
         }
 
         private void InitializeClient()
@@ -48,6 +52,36 @@ namespace RMS_DESKTOP_UI.Helpers
                     //var result = await response.Content.ReadAsStringAsync();
                     var result = await response.Content.ReadAsAsync<AuthenticatedUser>();
                     return result;
+                }
+                else
+                {
+                    throw new Exception(response.ReasonPhrase);
+                }
+            }
+        }
+
+        public async Task GetLoggedInUserInfo(string token)
+        {
+            apiClient.DefaultRequestHeaders.Clear();
+            apiClient.DefaultRequestHeaders.Accept.Clear();
+            apiClient.DefaultRequestHeaders.Accept.Add(                
+                new MediaTypeWithQualityHeaderValue("application/json")
+                );
+            apiClient.DefaultRequestHeaders.Add("Authorization",
+                $"Bearer { token }"
+                );
+
+            using (HttpResponseMessage response = await apiClient.GetAsync("api/User"))
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadAsAsync<LoggedInUserModel>();
+                    _loggedInUser.CreatedDate = result.CreatedDate;
+                    _loggedInUser.EmailAddress = result.EmailAddress;
+                    _loggedInUser.FirstName = result.FirstName;
+                    _loggedInUser.Id = result.Id;
+                    _loggedInUser.LastName = result.LastName;
+                    _loggedInUser.Token = token;
                 }
                 else
                 {

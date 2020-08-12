@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using RMS_DESKTOP_UI.Helpers;
+using RMS_DESKTOP_UI.Library.Api;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,7 +40,37 @@ namespace RMS_DESKTOP_UI.ViewModels
 				;
 			}
 		}
+
+
+		public bool IsErrorVisible
+		{
+			get {
+				bool output = false;
+
+				if (ErrorMessage?.Length > 0)
+				{
+					output = true;
+				}
+
+				return output;
+			}
 		
+		}
+
+		private string _errorMessage;
+
+		public string ErrorMessage
+		{
+			get { return _errorMessage; }
+			set {
+				_errorMessage = value;				
+				NotifyOfPropertyChange(() => ErrorMessage);
+				NotifyOfPropertyChange(() => IsErrorVisible);
+			}
+		}
+
+
+
 		public bool CanLogIn
 		{
 			get
@@ -59,11 +90,15 @@ namespace RMS_DESKTOP_UI.ViewModels
 		{
 			try
 			{
+				ErrorMessage = "";
 				var result = await _apiHelper.Authenticate(UserName, Password);
+
+				await _apiHelper.GetLoggedInUserInfo(result.Access_Token);
+				ErrorMessage = "All good";
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine();
+				ErrorMessage = e.Message;
 			}
 		}
 	}

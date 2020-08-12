@@ -1,5 +1,7 @@
 ﻿using Caliburn.Micro;
 using RMS_DESKTOP_UI.Helpers;
+using RMS_DESKTOP_UI.Library.Api;
+using RMS_DESKTOP_UI.Library.Models;
 using RMS_DESKTOP_UI.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -42,6 +44,7 @@ namespace RMS_DESKTOP_UI
                 // specify interface, provide implementation
                 .Singleton<IWindowManager, WindowManager>()
                 .Singleton<IEventAggregator, EventAggregator>()
+                .Singleton<ILoggedInUserModel, LoggedInUserModel>()
                 .Singleton<IAPIHelper, APIHelper>();
 
             // reflection on current application instance
