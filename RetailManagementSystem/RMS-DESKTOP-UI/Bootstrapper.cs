@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using RMS_DESKTOP_UI.Helpers;
 using RMS_DESKTOP_UI.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace RMS_DESKTOP_UI
 {
@@ -15,6 +17,12 @@ namespace RMS_DESKTOP_UI
         public Bootstrapper()
         {
             Initialize();
+
+            ConventionManager.AddElementConvention<PasswordBox>(
+                PasswordBoxHelper.BoundPasswordProperty,
+                "Password",
+                "PasswordChanged");
+
         }
 
         protected override void OnStartup(object sender, StartupEventArgs e)
@@ -33,7 +41,8 @@ namespace RMS_DESKTOP_UI
             _container
                 // specify interface, provide implementation
                 .Singleton<IWindowManager, WindowManager>()
-                .Singleton<IEventAggregator, EventAggregator>();
+                .Singleton<IEventAggregator, EventAggregator>()
+                .Singleton<IAPIHelper, APIHelper>();
 
             // reflection on current application instance
             GetType().Assembly.GetTypes()
