@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using RMS_DESKTOP_UI.EventModels;
 using RMS_DESKTOP_UI.Helpers;
 using RMS_DESKTOP_UI.Library.Api;
 using System;
@@ -14,11 +15,14 @@ namespace RMS_DESKTOP_UI.ViewModels
 		private string _username;
 		private string _password;
 		private IAPIHelper _apiHelper;
+		private IEventAggregator _events;
 
-		public LoginViewModel(IAPIHelper apiHelpeer)
+		public LoginViewModel(IAPIHelper apiHelpeer, IEventAggregator events)
 		{
 			_apiHelper = apiHelpeer;
+			_events = events;
 		}
+
 		public string UserName
 		{
 			get { return _username; }
@@ -94,7 +98,8 @@ namespace RMS_DESKTOP_UI.ViewModels
 				var result = await _apiHelper.Authenticate(UserName, Password);
 
 				await _apiHelper.GetLoggedInUserInfo(result.Access_Token);
-				ErrorMessage = "All good";
+
+				_events.PublishOnUIThread(new LogOnEvent());
 			}
 			catch (Exception e)
 			{

@@ -21,9 +21,10 @@ namespace RMS_DESKTOP_UI.ViewModels
 			}
 		}
 
-		private string _itemQuantity;
+		// Caliburn micro validates input for an int
+		private int _itemQuantity;
 
-		public string ItemQuantity
+		public int ItemQuantity
 		{
 			get { return _itemQuantity; }
 			set { 
