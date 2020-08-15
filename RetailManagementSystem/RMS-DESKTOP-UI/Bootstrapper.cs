@@ -34,10 +34,12 @@ namespace RMS_DESKTOP_UI
             DisplayRootViewFor<ShellViewModel>();
         }
 
+        // DI container
         // Sets an instance of itself to itself, passes out this reference to requesting components
         protected override void Configure()
         {
-            _container.Instance(_container);
+            _container.Instance(_container)
+                .PerRequest<IProductEndpoint, ProductEndpoint>();
 
             // Get from caliburn micro, a singleton of WindowManager and EventAggregator
             _container

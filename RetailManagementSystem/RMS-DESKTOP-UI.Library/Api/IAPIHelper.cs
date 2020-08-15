@@ -1,4 +1,5 @@
 ﻿using RMS_DESKTOP_UI.Models;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace RMS_DESKTOP_UI.Library.Api
@@ -7,5 +8,6 @@ namespace RMS_DESKTOP_UI.Library.Api
     {
         Task<AuthenticatedUser> Authenticate(string username, string password);
         Task GetLoggedInUserInfo(string token);
+        HttpClient ApiClient { get; }
     }
 }
