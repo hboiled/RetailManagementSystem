@@ -13,17 +13,17 @@ namespace RMS_DESKTOP_UI.ViewModels
     public class SalesViewModel: Screen
     {
 		private BindingList<ProductModel> _products;
-		private BindingList<ProductModel> _cart;
+		private BindingList<CartItemModel> _cart = new BindingList<CartItemModel>();
 		private IProductEndpoint _productEndpoint;
 
 		public SalesViewModel(IProductEndpoint productEndpoint)
 		{
-			_productEndpoint = productEndpoint;
-			_products = new BindingList<ProductModel>();
+			_productEndpoint = productEndpoint;			
 		}
 
 		protected override async void OnViewLoaded(object view)
 		{
+			// when view is loaded, asynchronously load items from api
 			base.OnViewLoaded(view);
 			await LoadItems();
 		}
@@ -33,6 +33,19 @@ namespace RMS_DESKTOP_UI.ViewModels
 			var items = await _productEndpoint.GetAll();
 			Products = new BindingList<ProductModel>(items);
 		}
+
+		private ProductModel _selectedProduct;
+
+		public ProductModel SelectedProduct
+		{
+			get { return _selectedProduct; }
+			set {
+				_selectedProduct = value;
+				NotifyOfPropertyChange(() => SelectedProduct);
+				NotifyOfPropertyChange(() => CanAddToCart);
+			}
+		}
+
 
 		public BindingList<ProductModel> Products
 		{
@@ -52,11 +65,12 @@ namespace RMS_DESKTOP_UI.ViewModels
 			set { 
 				_itemQuantity = value;
 				NotifyOfPropertyChange(() => ItemQuantity);
+				NotifyOfPropertyChange(() => CanAddToCart);
 			}
 		}
 		
 
-		public BindingList<ProductModel> Cart
+		public BindingList<CartItemModel> Cart
 		{
 			get { return _cart; }
 			set
@@ -96,6 +110,11 @@ namespace RMS_DESKTOP_UI.ViewModels
 			{
 				bool output = false;
 
+				if (ItemQuantity > 0 && SelectedProduct?.QuantityInStock >= ItemQuantity)
+				{
+					output = true;
+				}
+
 				return output;
 			}
 		}
@@ -122,7 +141,13 @@ namespace RMS_DESKTOP_UI.ViewModels
 
 		public void AddToCart()
 		{
+			CartItemModel item = new CartItemModel
+			{
+				Product = SelectedProduct,
+				QuantityInCart = ItemQuantity
+			};
 
+			Cart.Add(item);
 		}
 
 		public void RemoveFromCart()
