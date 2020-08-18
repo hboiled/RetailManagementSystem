@@ -11,18 +11,16 @@ namespace RMS_DESKTOP_UI.ViewModels
     public class ShellViewModel : Conductor<object>, IHandle<LogOnEvent>
     {
         private IEventAggregator _events;
-        private SalesViewModel _salesVM;
-        private SimpleContainer _container;
+        private SalesViewModel _salesVM;        
 
-        public ShellViewModel(LoginViewModel loginVM, IEventAggregator events, SalesViewModel salesVM,
-            SimpleContainer container)
+        public ShellViewModel(LoginViewModel loginVM, IEventAggregator events, SalesViewModel salesVM)
         {
             _events = events;
             _salesVM = salesVM;
-            _container = container;
             _events.Subscribe(this);
             
-            ActivateItem(_container.GetInstance<LoginViewModel>());
+            // IoC inversion of control container can be accessed without the simple container for DI
+            ActivateItem(IoC.Get<LoginViewModel>());
         }
 
         public void Handle(LogOnEvent message)
