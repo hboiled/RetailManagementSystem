@@ -16,12 +16,14 @@ namespace RMS_DESKTOP_UI.ViewModels
 		private BindingList<ProductModel> _products;
 		private BindingList<CartItemModel> _cart = new BindingList<CartItemModel>();
 		private IProductEndpoint _productEndpoint;
-		private IConfigHelper _configHelper;
+		//private IConfigHelper _configHelper;
+		private ISaleEndpoint _saleEndpoint;
 
-		public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper)
+		public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint)
 		{
 			_productEndpoint = productEndpoint;
-			_configHelper = configHelper;
+			//_configHelper = configHelper;
+			_saleEndpoint = saleEndpoint;
 		}
 
 		protected override async void OnViewLoaded(object view)
@@ -113,7 +115,7 @@ namespace RMS_DESKTOP_UI.ViewModels
 		private decimal CalculateTax()
 		{
 			decimal taxAmount = 0;
-			decimal taxRate = _configHelper.GetTaxRate();
+			decimal taxRate = 0;//_configHelper.GetTaxRate();
 
 			taxAmount = Cart
 				.Where(x => x.Product.IsTaxable)
@@ -171,6 +173,11 @@ namespace RMS_DESKTOP_UI.ViewModels
 			{
 				bool output = false;
 
+				if (Cart.Count > 0)
+				{
+					output = true;
+				}
+
 				return output;
 			}
 		}
@@ -202,6 +209,7 @@ namespace RMS_DESKTOP_UI.ViewModels
 			NotifyOfPropertyChange(() => SubTotal);
 			NotifyOfPropertyChange(() => Tax);
 			NotifyOfPropertyChange(() => Total);
+			NotifyOfPropertyChange(() => CanCheckOut);
 		}
 
 		public void RemoveFromCart()
@@ -209,11 +217,23 @@ namespace RMS_DESKTOP_UI.ViewModels
 			NotifyOfPropertyChange(() => SubTotal);
 			NotifyOfPropertyChange(() => Tax);
 			NotifyOfPropertyChange(() => Total);
+			NotifyOfPropertyChange(() => CanCheckOut);
 		}
 
-		public void CheckOut()
+		public async Task CheckOut()
 		{
+			SaleModel sale = new SaleModel();
 
+			foreach (var item in Cart)
+			{
+				sale.SaleDetails.Add(new SaleDetailModel
+				{
+					ProductId = item.Product.Id,
+					Quantity = item.QuantityInCart
+				});
+			}
+
+			await _saleEndpoint.PostSale(sale);
 		}
 
 

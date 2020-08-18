@@ -70,7 +70,7 @@
                  MinWidth="100" Margin="0.333,0,0,0" >
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding ProductName}"/>
+                    <TextBlock Text="{Binding DisplayText}"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

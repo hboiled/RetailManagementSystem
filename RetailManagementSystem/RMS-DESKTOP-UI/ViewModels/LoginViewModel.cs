@@ -12,8 +12,9 @@ namespace RMS_DESKTOP_UI.ViewModels
 {
     public class LoginViewModel : Screen
     {
-		private string _username;
-		private string _password;
+		// default dummy creds to make testing faster
+		private string _username = "a@a.com";
+		private string _password = "Pwd11111";
 		private IAPIHelper _apiHelper;
 		private IEventAggregator _events;
 
