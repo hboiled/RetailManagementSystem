@@ -21,7 +21,7 @@ namespace DataManager.Controllers
 
             UserData data = new UserData();
 
-            return data.GetUserById(userId).First();            
+            return data.GetUserById(userId).FirstOrDefault();            
         }
     }
 }

@@ -22,7 +22,7 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0"/>
-            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
@@ -32,13 +32,28 @@
         <TextBlock Text="Sales Page" FontSize="48" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
                    Margin="0 0 0 20"/>
 
-        <TextBlock Text="Items" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1"/>
+        <TextBlock Text="Items" Grid.Column="0" Grid.Row="1"/>
         <ListBox x:Name="Products" Grid.Row="2" Grid.Column="0" Grid.RowSpan="3" MinHeight="200"
-                 MinWidth="100" Grid.ColumnSpan="2" Margin="0.333,0,0,0"
+                 MinWidth="150" Grid.ColumnSpan="2" Margin="0.333,0,0,0"
                  SelectedItem="{Binding SelectedProduct}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding ProductName}"/>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="{Binding ProductName}"/>
+                        <StackPanel Orientation="Horizontal">
+
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Price: " FontSize="14"/>
+                                <TextBlock Text="{Binding RetailPrice, StringFormat='{}{0:C}'}" FontSize="14"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="5 0 0 0">
+                                <TextBlock Text="In Stock: " FontSize="14"/>
+                                <TextBlock Text="{Binding QuantityInStock}" FontSize="14"/>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
@@ -55,7 +70,7 @@
                  MinWidth="100" Margin="0.333,0,0,0" >
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding DisplayText}"/>
+                    <TextBlock Text="{Binding ProductName}"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

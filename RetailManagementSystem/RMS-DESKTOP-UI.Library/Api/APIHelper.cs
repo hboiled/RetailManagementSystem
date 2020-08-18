@@ -44,6 +44,8 @@ namespace RMS_DESKTOP_UI.Library.Api
                 );
         }
 
+        // NOTE: there is currently no way for the program to register users to RMS user table
+        // new users must be manually added in the meantime
         public async Task<AuthenticatedUser> Authenticate(string username, string password)
         {
             var data = new FormUrlEncodedContent(new[]
