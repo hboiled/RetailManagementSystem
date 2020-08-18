@@ -34,7 +34,7 @@
 
         <TextBlock Text="Items" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1"/>
         <ListBox x:Name="Products" Grid.Row="2" Grid.Column="0" Grid.RowSpan="3" MinHeight="200"
-                 MinWidth="100" Grid.ColumnSpan="2"
+                 MinWidth="100" Grid.ColumnSpan="2" Margin="0.333,0,0,0"
                  SelectedItem="{Binding SelectedProduct}">
             <ListBox.ItemTemplate>
                 <DataTemplate>

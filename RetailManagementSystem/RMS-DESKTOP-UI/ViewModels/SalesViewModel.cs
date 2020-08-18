@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using RMS_DESKTOP_UI.Library.Api;
+using RMS_DESKTOP_UI.Library.Helpers;
 using RMS_DESKTOP_UI.Library.Models;
 using System;
 using System.Collections.Generic;
@@ -15,10 +16,12 @@ namespace RMS_DESKTOP_UI.ViewModels
 		private BindingList<ProductModel> _products;
 		private BindingList<CartItemModel> _cart = new BindingList<CartItemModel>();
 		private IProductEndpoint _productEndpoint;
+		private IConfigHelper _configHelper;
 
-		public SalesViewModel(IProductEndpoint productEndpoint)
+		public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper)
 		{
-			_productEndpoint = productEndpoint;			
+			_productEndpoint = productEndpoint;
+			_configHelper = configHelper;
 		}
 
 		protected override async void OnViewLoaded(object view)
@@ -57,7 +60,7 @@ namespace RMS_DESKTOP_UI.ViewModels
 		}
 
 		// Caliburn micro validates input for an int
-		private int _itemQuantity;
+		private int _itemQuantity = 1;
 
 		public int ItemQuantity
 		{
@@ -82,24 +85,53 @@ namespace RMS_DESKTOP_UI.ViewModels
 
 		public string SubTotal
 		{
-			get { 
-				return "$00.00";
+			get {
+				return CalculateSubTotal().ToString("C");
 			}			
+		}
+
+		private decimal CalculateSubTotal()
+		{
+			decimal subTotal = 0;
+
+			foreach (var item in Cart)
+			{
+				subTotal += item.Product.RetailPrice * item.QuantityInCart;
+			}
+
+			return subTotal;
 		}
 
 		public string Tax
 		{
 			get
 			{
-				return "$00.00";
+				return CalculateTax().ToString("C");
 			}
+		}
+
+		private decimal CalculateTax()
+		{
+			decimal taxAmount = 0;
+			decimal taxRate = _configHelper.GetTaxRate();
+
+			foreach (var item in Cart)
+			{
+				if (item.Product.IsTaxable)
+				{
+					taxAmount += (item.Product.RetailPrice * item.QuantityInCart) * taxRate;
+				}
+			}
+
+			return taxAmount;
 		}
 
 		public string Total
 		{
 			get
 			{
-				return "$00.00";
+				decimal total = CalculateSubTotal() + CalculateTax();
+				return total.ToString("C");
 			}
 		}
 
@@ -141,18 +173,38 @@ namespace RMS_DESKTOP_UI.ViewModels
 
 		public void AddToCart()
 		{
-			CartItemModel item = new CartItemModel
-			{
-				Product = SelectedProduct,
-				QuantityInCart = ItemQuantity
-			};
+			CartItemModel existingItem = Cart.FirstOrDefault(x => x.Product == SelectedProduct);
 
-			Cart.Add(item);
+			if (existingItem != null)
+			{
+				existingItem.QuantityInCart += ItemQuantity;
+				//temp hack to refresh display
+				Cart.Remove(existingItem);
+				Cart.Add(existingItem);
+			}
+			else
+			{
+				CartItemModel item = new CartItemModel
+				{
+					Product = SelectedProduct,
+					QuantityInCart = ItemQuantity
+				};
+				Cart.Add(item);
+			}
+
+			SelectedProduct.QuantityInStock -= ItemQuantity;
+			ItemQuantity = 1;
+
+			NotifyOfPropertyChange(() => SubTotal);
+			NotifyOfPropertyChange(() => Tax);
+			NotifyOfPropertyChange(() => Total);
 		}
 
 		public void RemoveFromCart()
 		{
-
+			NotifyOfPropertyChange(() => SubTotal);
+			NotifyOfPropertyChange(() => Tax);
+			NotifyOfPropertyChange(() => Total);
 		}
 
 		public void CheckOut()

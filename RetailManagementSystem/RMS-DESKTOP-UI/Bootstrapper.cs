@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using RMS_DESKTOP_UI.Helpers;
 using RMS_DESKTOP_UI.Library.Api;
+using RMS_DESKTOP_UI.Library.Helpers;
 using RMS_DESKTOP_UI.Library.Models;
 using RMS_DESKTOP_UI.ViewModels;
 using System;
@@ -47,6 +48,7 @@ namespace RMS_DESKTOP_UI
                 .Singleton<IWindowManager, WindowManager>()
                 .Singleton<IEventAggregator, EventAggregator>()
                 .Singleton<ILoggedInUserModel, LoggedInUserModel>()
+                .Singleton<IConfigHelper, ConfigHelper>()
                 .Singleton<IAPIHelper, APIHelper>();
 
             // reflection on current application instance
