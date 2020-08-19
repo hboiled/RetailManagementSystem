@@ -1,8 +1,10 @@
-﻿using Caliburn.Micro;
+﻿using AutoMapper;
+using Caliburn.Micro;
 using RMS_DESKTOP_UI.Helpers;
 using RMS_DESKTOP_UI.Library.Api;
 using RMS_DESKTOP_UI.Library.Helpers;
 using RMS_DESKTOP_UI.Library.Models;
+using RMS_DESKTOP_UI.Models;
 using RMS_DESKTOP_UI.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -35,10 +37,23 @@ namespace RMS_DESKTOP_UI
             DisplayRootViewFor<ShellViewModel>();
         }
 
+        private IMapper ConfigureAutomapper()
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<ProductModel, ProductDisplayModel>();
+                cfg.CreateMap<CartItemModel, CartItemDisplayModel>();
+            });
+
+            return config.CreateMapper();
+        }
+
         // DI container
         // Sets an instance of itself to itself, passes out this reference to requesting components
         protected override void Configure()
         {
+            _container.Instance(ConfigureAutomapper());
+
             _container.Instance(_container)
                 .PerRequest<IProductEndpoint, ProductEndpoint>()
                 .PerRequest<ISaleEndpoint, SaleEndpoint>();
@@ -49,7 +64,7 @@ namespace RMS_DESKTOP_UI
                 .Singleton<IWindowManager, WindowManager>()
                 .Singleton<IEventAggregator, EventAggregator>()
                 .Singleton<ILoggedInUserModel, LoggedInUserModel>()
-                //.Singleton<IConfigHelper, ConfigHelper>()
+                .Singleton<IConfigHelper, ConfigHelper>()
                 .Singleton<IAPIHelper, APIHelper>();
 
             // reflection on current application instance

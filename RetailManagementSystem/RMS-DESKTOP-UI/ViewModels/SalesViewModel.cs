@@ -1,7 +1,9 @@
-﻿using Caliburn.Micro;
+﻿using AutoMapper;
+using Caliburn.Micro;
 using RMS_DESKTOP_UI.Library.Api;
 using RMS_DESKTOP_UI.Library.Helpers;
 using RMS_DESKTOP_UI.Library.Models;
+using RMS_DESKTOP_UI.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,17 +15,20 @@ namespace RMS_DESKTOP_UI.ViewModels
 {
     public class SalesViewModel: Screen
     {
-		private BindingList<ProductModel> _products;
-		private BindingList<CartItemModel> _cart = new BindingList<CartItemModel>();
+		private BindingList<ProductDisplayModel> _products;
+		private BindingList<CartItemDisplayModel> _cart = new BindingList<CartItemDisplayModel>();
 		private IProductEndpoint _productEndpoint;
-		//private IConfigHelper _configHelper;
+		private IConfigHelper _configHelper;
 		private ISaleEndpoint _saleEndpoint;
+		private IMapper _mapper;
 
-		public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint)
+		public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint,
+			IMapper mapper)
 		{
 			_productEndpoint = productEndpoint;
-			//_configHelper = configHelper;
+			_configHelper = configHelper;
 			_saleEndpoint = saleEndpoint;
+			_mapper = mapper;
 		}
 
 		protected override async void OnViewLoaded(object view)
@@ -35,13 +40,14 @@ namespace RMS_DESKTOP_UI.ViewModels
 
 		private async Task LoadItems()
 		{
-			var items = await _productEndpoint.GetAll();
-			Products = new BindingList<ProductModel>(items);
+			var itemList = await _productEndpoint.GetAll();
+			var items = _mapper.Map<List<ProductDisplayModel>>(itemList);
+			Products = new BindingList<ProductDisplayModel>(items);
 		}
 
-		private ProductModel _selectedProduct;
+		private ProductDisplayModel _selectedProduct;
 
-		public ProductModel SelectedProduct
+		public ProductDisplayModel SelectedProduct
 		{
 			get { return _selectedProduct; }
 			set {
@@ -52,7 +58,7 @@ namespace RMS_DESKTOP_UI.ViewModels
 		}
 
 
-		public BindingList<ProductModel> Products
+		public BindingList<ProductDisplayModel> Products
 		{
 			get { return _products; }
 			set { 
@@ -75,7 +81,7 @@ namespace RMS_DESKTOP_UI.ViewModels
 		}
 		
 
-		public BindingList<CartItemModel> Cart
+		public BindingList<CartItemDisplayModel> Cart
 		{
 			get { return _cart; }
 			set
@@ -115,7 +121,7 @@ namespace RMS_DESKTOP_UI.ViewModels
 		private decimal CalculateTax()
 		{
 			decimal taxAmount = 0;
-			decimal taxRate = 0;//_configHelper.GetTaxRate();
+			decimal taxRate = _configHelper.GetTaxRate();
 
 			taxAmount = Cart
 				.Where(x => x.Product.IsTaxable)
@@ -184,18 +190,18 @@ namespace RMS_DESKTOP_UI.ViewModels
 
 		public void AddToCart()
 		{
-			CartItemModel existingItem = Cart.FirstOrDefault(x => x.Product == SelectedProduct);
+			CartItemDisplayModel existingItem = Cart.FirstOrDefault(x => x.Product == SelectedProduct);
 
 			if (existingItem != null)
 			{
 				existingItem.QuantityInCart += ItemQuantity;
 				//temp hack to refresh display
-				Cart.Remove(existingItem);
-				Cart.Add(existingItem);
+				//Cart.Remove(existingItem);
+				//Cart.Add(existingItem);
 			}
 			else
 			{
-				CartItemModel item = new CartItemModel
+				CartItemDisplayModel item = new CartItemDisplayModel
 				{
 					Product = SelectedProduct,
 					QuantityInCart = ItemQuantity
