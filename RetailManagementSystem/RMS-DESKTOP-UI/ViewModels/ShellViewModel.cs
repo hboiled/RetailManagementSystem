@@ -5,27 +5,60 @@ using System.Text;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using RMS_DESKTOP_UI.EventModels;
+using RMS_DESKTOP_UI.Library.Models;
 
 namespace RMS_DESKTOP_UI.ViewModels
 {
     public class ShellViewModel : Conductor<object>, IHandle<LogOnEvent>
     {
         private IEventAggregator _events;
-        private SalesViewModel _salesVM;        
+        private SalesViewModel _salesVM;
+        private ILoggedInUserModel _user;
 
-        public ShellViewModel(LoginViewModel loginVM, IEventAggregator events, SalesViewModel salesVM)
+        public ShellViewModel(LoginViewModel loginVM, IEventAggregator events, SalesViewModel salesVM, ILoggedInUserModel user)
         {
             _events = events;
             _salesVM = salesVM;
+            _user = user;
             _events.Subscribe(this);
             
             // IoC inversion of control container can be accessed without the simple container for DI
             ActivateItem(IoC.Get<LoginViewModel>());
         }
 
+        public void ExitApplication()
+        {
+            TryClose();
+        }
+
+        public bool IsLoggedIn
+        {
+            get
+            {
+                bool output = false;
+
+                if (string.IsNullOrWhiteSpace(_user.Token) == false)
+                {
+                    // if user logged in
+                    return true;
+                }
+
+                return output;
+            }
+        }
+
+        public void LogOut()
+        {
+            _user.LogOffUser();
+            ActivateItem(IoC.Get<LoginViewModel>());
+            NotifyOfPropertyChange(() => IsLoggedIn);
+        }
+
+        // handles logon event, message isn't important
         public void Handle(LogOnEvent message)
         {
-            ActivateItem(_salesVM);            
+            ActivateItem(_salesVM);
+            NotifyOfPropertyChange(() => IsLoggedIn);
         }
     }
 }

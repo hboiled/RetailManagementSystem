@@ -14,5 +14,17 @@ namespace RMS_DESKTOP_UI.Library.Models
         public string LastName { get; set; }
         public string EmailAddress { get; set; }
         public DateTime CreatedDate { get; set; }
+
+        public void LogOffUser()
+        {
+            // simple reset method to be used with DI
+            // logic is simple enough that is permissable under a model
+            Token = "";
+            Id = "";
+            FirstName = "";
+            LastName = "";
+            EmailAddress = "";
+            CreatedDate = DateTime.MinValue;
+        }
     }
 }
