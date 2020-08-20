@@ -48,10 +48,12 @@ namespace DataManager.Library.Internal.DataAccess
         public void StartTransaction(string connectionStringName)
         {
             string connectionString = GetConnectionString(connectionStringName);
-
+            
             _connection = new SqlConnection(connectionString);
             _connection.Open();
             _transaction = _connection.BeginTransaction();
+
+            isClosed = false;
         }
 
         public void SaveDataInTransaction<T>(string storedProcedure, T parameters)
@@ -71,21 +73,41 @@ namespace DataManager.Library.Internal.DataAccess
             
         }
 
+        private bool isClosed = false;
+
         public void CommitTransaction()
         {
             _transaction?.Commit();
             _connection?.Close();
+
+            isClosed = true;
         }
 
         public void RollbackTransaction()
         {
             _transaction?.Rollback();
             _connection?.Close();
+
+            isClosed = true;
         }
 
+        // this is called at the end of a 'using' statement involving this class
         public void Dispose()
         {
-            CommitTransaction();
+            if (isClosed == false)
+            {
+                try
+                {
+                    CommitTransaction();
+                }
+                catch
+                {
+                    // TODO: Log this
+                }
+            }
+
+            _transaction = null;
+            _connection = null;
         }
     }
 }

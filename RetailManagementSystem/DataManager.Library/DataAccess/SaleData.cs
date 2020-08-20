@@ -58,6 +58,10 @@ namespace DataManager.Library.DataAccess
 
             sale.Total = sale.SubTotal + sale.Tax;
 
+            // opening these queries as transactions allows us to perform several different
+            // operations on a set of data, act on it as though the database has consumed the changes
+            // then submit all the changes as a batch to the database at once to ensure the transaction
+            // is completed fully before being saved into the db
             using(SqlDataAccess sql = new SqlDataAccess())
             {
                 try
