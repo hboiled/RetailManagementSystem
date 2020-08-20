@@ -11,6 +11,9 @@ namespace DataManager.Library.DataAccess
 {
     public class SaleData
     {
+        // Transactions in MSSQL should be done in one big chunk, otherwise there is a possibility
+        // that corrupt or incomplete data will be added to the db
+        // Better for it to fail completely than to have misleading data in the db
         public void SaveSale(SaleModel saleInfo, string cashierId)
         {
             // Refactor for SOLID
@@ -55,23 +58,37 @@ namespace DataManager.Library.DataAccess
 
             sale.Total = sale.SubTotal + sale.Tax;
 
-            SqlDataAccess sql = new SqlDataAccess();
-            sql.SaveData<SaleDBModel>("dbo.spSale_Insert", sale, "RMSData");
-
-            sale.Id = sql.LoadData<int, dynamic>("spSale_Lookup", new 
-            {sale.CashierId, sale.SaleDate }, "RMSData")
-                .FirstOrDefault();
-
-            // fill in sale detail models
-            foreach (var item in saleDetails)
+            using(SqlDataAccess sql = new SqlDataAccess())
             {
-                // all items belong to this sale id
-                item.SaleId = sale.Id;
+                try
+                {
+                    sql.StartTransaction("RMSData");
 
-                sql.SaveData("dbo.spSaleDetail_Insert", item, "RMSData");
+                    sql.SaveDataInTransaction<SaleDBModel>("dbo.spSale_Insert", sale);
+
+                    sale.Id = sql.LoadDataInTransaction<int, dynamic>("spSale_Lookup", new
+                    { sale.CashierId, sale.SaleDate })
+                        .FirstOrDefault();
+
+                    // fill in sale detail models
+                    foreach (var item in saleDetails)
+                    {
+                        // all items belong to this sale id
+                        item.SaleId = sale.Id;
+
+                        sql.SaveDataInTransaction("dbo.spSaleDetail_Insert", item);
+                    }
+
+                    sql.CommitTransaction();
+                }
+                catch
+                {
+                    sql.RollbackTransaction();
+                    throw;
+                }
+
+                
             }
-
-            
         }
     }
 }
