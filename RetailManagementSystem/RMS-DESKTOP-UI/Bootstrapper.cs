@@ -23,6 +23,7 @@ namespace RMS_DESKTOP_UI
         {
             Initialize();
 
+            // add password box helper
             ConventionManager.AddElementConvention<PasswordBox>(
                 PasswordBoxHelper.BoundPasswordProperty,
                 "Password",
