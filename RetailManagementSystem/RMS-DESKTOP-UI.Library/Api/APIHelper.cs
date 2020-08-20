@@ -99,5 +99,10 @@ namespace RMS_DESKTOP_UI.Library.Api
                 }
             }
         }
+
+        public void LogOffUser()
+        {
+            _apiClient.DefaultRequestHeaders.Clear();
+        }
     }
 }

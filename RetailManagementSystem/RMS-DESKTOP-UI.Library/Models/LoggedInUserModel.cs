@@ -15,7 +15,7 @@ namespace RMS_DESKTOP_UI.Library.Models
         public string EmailAddress { get; set; }
         public DateTime CreatedDate { get; set; }
 
-        public void LogOffUser()
+        public void ResetUserModel()
         {
             // simple reset method to be used with DI
             // logic is simple enough that is permissable under a model

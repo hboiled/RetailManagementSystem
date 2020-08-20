@@ -9,5 +9,6 @@ namespace RMS_DESKTOP_UI.Library.Api
         Task<AuthenticatedUser> Authenticate(string username, string password);
         Task GetLoggedInUserInfo(string token);
         HttpClient ApiClient { get; }
+        void LogOffUser();
     }
 }
