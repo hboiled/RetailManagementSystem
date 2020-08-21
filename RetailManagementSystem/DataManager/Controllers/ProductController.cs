@@ -12,7 +12,7 @@ namespace DataManager.Controllers
     [Authorize]
     public class ProductController : ApiController
     {
-        // additive roles are marked by 2 separate authorize tags, users must have both roles to access them
+        // additive roles are marked by 2 separate authorize tags, users must have both roles to access them        
         [Authorize(Roles = "Cashier")]
         public List<ProductModel> Get()
         {

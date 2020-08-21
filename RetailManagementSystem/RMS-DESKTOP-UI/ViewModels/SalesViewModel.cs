@@ -7,9 +7,11 @@ using RMS_DESKTOP_UI.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace RMS_DESKTOP_UI.ViewModels
 {
@@ -21,21 +23,52 @@ namespace RMS_DESKTOP_UI.ViewModels
 		private IConfigHelper _configHelper;
 		private ISaleEndpoint _saleEndpoint;
 		private IMapper _mapper;
+		private StatusInfoViewModel _status;
+		private IWindowManager _window;
 
 		public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint,
-			IMapper mapper)
+			IMapper mapper, StatusInfoViewModel status, IWindowManager window)
 		{
 			_productEndpoint = productEndpoint;
 			_configHelper = configHelper;
 			_saleEndpoint = saleEndpoint;
 			_mapper = mapper;
+			_status = status;
+			_window = window;
 		}
 
 		protected override async void OnViewLoaded(object view)
 		{
 			// when view is loaded, asynchronously load items from api
 			base.OnViewLoaded(view);
-			await LoadItems();
+			try
+			{
+				await LoadItems();
+			}
+			catch (Exception ex)
+			{
+				dynamic settings = new ExpandoObject();
+
+				settings.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+				settings.ResizeMode = ResizeMode.NoResize;
+				settings.Title = "System Error";
+
+				if (ex.Message == "Unauthorized")
+				{
+					_status.UpdateMessage("Unauthorized Access", "You do not have permission to use this feature");
+					_window.ShowDialog(_status, null, settings); 
+				}
+				else
+				{
+					_status.UpdateMessage("Fatal Error", ex.Message);
+					_window.ShowDialog(_status, null, settings);
+				}
+
+				TryClose();
+
+				// var info = IoC.Get<StatusInfoViewModel>()
+				// get a new instance of the error msg without overriding the one from ctor
+			}
 		}
 
 		private async Task LoadItems()
