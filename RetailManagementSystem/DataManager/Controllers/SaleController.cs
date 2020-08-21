@@ -14,7 +14,7 @@ namespace DataManager.Controllers
     [Authorize]
     public class SaleController : ApiController
     {
-
+        [Authorize(Roles = "Cashier")]
         public void Post(SaleModel sale)
         {
             SaleData data = new SaleData();
@@ -23,10 +23,17 @@ namespace DataManager.Controllers
             data.SaveSale(sale, userId);
         }
 
-        // TODO: secure for manager level personnel only
+
+        [Authorize(Roles = "Manager,Admin")]
         [Route("GetSalesReport")]
         public List<SaleReportModel> GetSalesReport()
         {
+            if (RequestContext.Principal.IsInRole("Admin")) 
+            {
+                // through this, we can detect the user's role
+                // admin stuff
+            }
+
             SaleData data = new SaleData();
 
             return data.GetSaleReport();
