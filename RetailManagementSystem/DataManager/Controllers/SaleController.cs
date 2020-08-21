@@ -22,5 +22,14 @@ namespace DataManager.Controllers
 
             data.SaveSale(sale, userId);
         }
+
+        // TODO: secure for manager level personnel only
+        [Route("GetSalesReport")]
+        public List<SaleReportModel> GetSalesReport()
+        {
+            SaleData data = new SaleData();
+
+            return data.GetSaleReport();
+        }
     }
 }
