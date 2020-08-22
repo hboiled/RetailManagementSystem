@@ -10,6 +10,7 @@
         <Menu DockPanel.Dock="Top" FontSize="18">
             <MenuItem Header="_File">
                 <MenuItem x:Name="ExitApplication" Header="E_xit"/>
+                <MenuItem x:Name="UserManagement" Header="User_Management" />
             </MenuItem>
             <MenuItem Header="_Account"
                       Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">

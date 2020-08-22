@@ -57,7 +57,8 @@ namespace RMS_DESKTOP_UI
 
             _container.Instance(_container)
                 .PerRequest<IProductEndpoint, ProductEndpoint>()
-                .PerRequest<ISaleEndpoint, SaleEndpoint>();
+                .PerRequest<ISaleEndpoint, SaleEndpoint>()
+                .PerRequest<IUserEndpoint, UserEndpoint>();
 
             // Get from caliburn micro, a singleton of WindowManager and EventAggregator
             _container
