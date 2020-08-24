@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -12,10 +13,17 @@ namespace DataManager.Library.Internal.DataAccess
 {
     internal class SqlDataAccess : IDisposable
     {
+
+        public SqlDataAccess(IConfiguration config)
+        {
+            this.config = config;
+        }
+
         public string GetConnectionString(string name)
         {
             // grabs connection string from web api project web config file
-            return ConfigurationManager.ConnectionStrings[name].ConnectionString;
+            //return ConfigurationManager.ConnectionStrings[name].ConnectionString;
+            return config.GetConnectionString(name);
         }
 
         public List<T> LoadData<T, U>(string storedProcedure, U parameters, string connectionStringName)
@@ -74,6 +82,7 @@ namespace DataManager.Library.Internal.DataAccess
         }
 
         private bool isClosed = false;
+        private readonly IConfiguration config;
 
         public void CommitTransaction()
         {

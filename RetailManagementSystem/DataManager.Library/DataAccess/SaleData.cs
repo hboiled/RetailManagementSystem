@@ -1,5 +1,6 @@
 ﻿using DataManager.Library.Internal.DataAccess;
 using DataManager.Library.Models;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,6 +12,13 @@ namespace DataManager.Library.DataAccess
 {
     public class SaleData
     {
+        private readonly IConfiguration config;
+
+        public SaleData(IConfiguration config)
+        {
+            this.config = config;
+        }
+
         // Transactions in MSSQL should be done in one big chunk, otherwise there is a possibility
         // that corrupt or incomplete data will be added to the db
         // Better for it to fail completely than to have misleading data in the db
@@ -20,7 +28,7 @@ namespace DataManager.Library.DataAccess
 
             // Sale details models to be saved to db
             List<SaleDetailDBModel> saleDetails = new List<SaleDetailDBModel>();
-            ProductData products = new ProductData(); // temporary instantiation
+            ProductData products = new ProductData(config); // temporary instantiation
             var taxRate = ConfigHelper.GetTaxRate();
 
             foreach (var item in saleInfo.SaleDetails)
@@ -62,7 +70,7 @@ namespace DataManager.Library.DataAccess
             // operations on a set of data, act on it as though the database has consumed the changes
             // then submit all the changes as a batch to the database at once to ensure the transaction
             // is completed fully before being saved into the db
-            using(SqlDataAccess sql = new SqlDataAccess())
+            using(SqlDataAccess sql = new SqlDataAccess(config))
             {
                 try
                 {
@@ -97,7 +105,7 @@ namespace DataManager.Library.DataAccess
 
         public List<SaleReportModel> GetSaleReport()
         {
-            SqlDataAccess sql = new SqlDataAccess();
+            SqlDataAccess sql = new SqlDataAccess(config);
 
             var output = sql.LoadData<SaleReportModel, dynamic>("dbo.spSale_SaleReport", new { },
                 "RMSData");

@@ -14,7 +14,7 @@ namespace RMS_DESKTOP_UI.ViewModels
     {
 		// default dummy creds to make testing faster
 		private string _username = "a@a.com";
-		private string _password = "Pwd11111";
+		private string _password = "Pwd1111!";
 		private IAPIHelper _apiHelper;
 		private IEventAggregator _events;
 
