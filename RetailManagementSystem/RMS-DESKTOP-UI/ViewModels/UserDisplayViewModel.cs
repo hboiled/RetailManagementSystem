@@ -153,6 +153,7 @@ namespace RMS_DESKTOP_UI.ViewModels
 
 		private async Task LoadRoles()
 		{
+			AvailableRoles.Clear();
 			var roles = await _userEndpoint.GetAllRoles();
 
 			foreach (var role in roles)
