@@ -56,15 +56,15 @@ namespace RMS_DESKTOP_UI.ViewModels
 				if (ex.Message == "Unauthorized")
 				{
 					_status.UpdateMessage("Unauthorized Access", "You do not have permission to use this feature");
-					_window.ShowDialog(_status, null, settings); 
+					await _window.ShowDialogAsync(_status, null, settings); 
 				}
 				else
 				{
 					_status.UpdateMessage("Fatal Error", ex.Message);
-					_window.ShowDialog(_status, null, settings);
+					await _window.ShowDialogAsync(_status, null, settings);
 				}
 
-				TryClose();
+				TryCloseAsync();
 
 				// var info = IoC.Get<StatusInfoViewModel>()
 				// get a new instance of the error msg without overriding the one from ctor

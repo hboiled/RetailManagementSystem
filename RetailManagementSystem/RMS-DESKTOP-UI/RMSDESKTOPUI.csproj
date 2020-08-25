@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>netcoreapp3.0</TargetFramework>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
+	<ItemGroup>
+	  <PackageReference Include="AutoMapper" Version="10.0.0" />
+	  <PackageReference Include="Caliburn.Micro" Version="4.0.105-alpha" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\RMS-DESKTOP-UI.Library\RMSDESKTOPUI.Library.csproj" />
+	</ItemGroup>
+</Project>

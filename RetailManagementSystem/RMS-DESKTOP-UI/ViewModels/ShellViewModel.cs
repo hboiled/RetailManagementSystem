@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using RMS_DESKTOP_UI.EventModels;
@@ -24,20 +25,20 @@ namespace RMS_DESKTOP_UI.ViewModels
             _salesVM = salesVM;
             _user = user;
             _apiHelper = apiHelper;
-            _events.Subscribe(this);
+            _events.SubscribeOnPublishedThread(this);
             
             // IoC inversion of control container can be accessed without the simple container for DI
-            ActivateItem(IoC.Get<LoginViewModel>());
+            ActivateItemAsync(IoC.Get<LoginViewModel>(), new CancellationToken());
         }
 
-        public void UserManagement()
+        public async Task UserManagement()
         {
-            ActivateItem(IoC.Get<UserDisplayViewModel>());
+            await ActivateItemAsync(IoC.Get<UserDisplayViewModel>(), new CancellationToken());
         }
 
         public void ExitApplication()
         {
-            TryClose();
+            TryCloseAsync();
         }
 
         public bool IsLoggedIn
@@ -57,18 +58,18 @@ namespace RMS_DESKTOP_UI.ViewModels
             }
         }
 
-        public void LogOut()
+        public async Task LogOut()
         {
             _user.ResetUserModel();
             _apiHelper.LogOffUser(); // clear token header so that it can't be reused when logged out
-            ActivateItem(IoC.Get<LoginViewModel>());
+            await ActivateItemAsync(IoC.Get<LoginViewModel>(), new CancellationToken());
             NotifyOfPropertyChange(() => IsLoggedIn);
         }
 
-        // handles logon event, message isn't important
-        public void Handle(LogOnEvent message)
+        // handles logon event, message isn't important        
+        public async Task HandleAsync(LogOnEvent message, CancellationToken cancellationToken)
         {
-            ActivateItem(_salesVM);
+            await ActivateItemAsync(_salesVM, cancellationToken);
             NotifyOfPropertyChange(() => IsLoggedIn);
         }
     }

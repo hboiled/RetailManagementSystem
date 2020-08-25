@@ -23,7 +23,7 @@ namespace RMS_DESKTOP_UI.ViewModels
 
         public void Close()
         {
-            TryClose();
+            TryCloseAsync();
         }
     }
 }
