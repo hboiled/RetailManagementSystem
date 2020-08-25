@@ -23,13 +23,13 @@ namespace RMSApi.Controllers
     {
         private readonly ApplicationDbContext context;
         private readonly UserManager<IdentityUser> userManager;
-        private readonly IConfiguration config;
+        private readonly IUserData userData;
 
-        public UserController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IConfiguration config)
+        public UserController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IUserData userData)
         {
             this.context = context;
             this.userManager = userManager;
-            this.config = config;
+            this.userData = userData;
         }
 
         // get logged in user
@@ -38,9 +38,7 @@ namespace RMSApi.Controllers
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            UserData data = new UserData(config);
-
-            return data.GetUserById(userId).FirstOrDefault();
+            return userData.GetUserById(userId).FirstOrDefault();
         }
 
 

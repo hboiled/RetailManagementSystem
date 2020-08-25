@@ -12,10 +12,11 @@ using RMSApi.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-//using Microsoft.OpenApi.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using DataManager.Library.DataAccess;
+using DataManager.Library.Internal.DataAccess;
 
 namespace RMSApi
 {
@@ -39,6 +40,16 @@ namespace RMSApi
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            // Library services, we create interfaces for each injectable class so we can swap out the implementation
+            // for a mock to make testing easier
+            // TRANSIENT: new instance every time we ask for it, opposed to singleton
+            services.AddTransient<IInventoryData, InventoryData>();
+            services.AddTransient<ISqlDataAccess, SqlDataAccess>();
+            services.AddTransient<IProductData, ProductData>();
+            services.AddTransient<ISaleData, SaleData>();
+            services.AddTransient<IUserData, UserData>();
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = "JwtBearer";

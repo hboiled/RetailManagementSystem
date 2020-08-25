@@ -9,30 +9,25 @@ using System.Threading.Tasks;
 
 namespace DataManager.Library.DataAccess
 {
-    public class ProductData
+    public class ProductData : IProductData
     {
-        private readonly IConfiguration config;
+        private readonly ISqlDataAccess sqlDataAccess;
 
-        public ProductData(IConfiguration config)
-        {
-            this.config = config;
+        public ProductData(ISqlDataAccess sqlDataAccess)
+        {            
+            this.sqlDataAccess = sqlDataAccess;
         }
 
         public List<ProductModel> GetProducts()
         {
-            SqlDataAccess sql = new SqlDataAccess(config);
-
-            var output = sql.LoadData<ProductModel, dynamic>("dbo.spProduct_GetAll", new { }, "RMSData");
-            return output;
+            return sqlDataAccess.LoadData<ProductModel, dynamic>("dbo.spProduct_GetAll", new { }, "RMSData");
+            
         }
 
         public ProductModel GetProductById(int id)
         {
-            SqlDataAccess sql = new SqlDataAccess(config);
-
-            var output = sql.LoadData<ProductModel, dynamic>("dbo.spProduct_GetById", new { Id = id }, "RMSData")
-                .FirstOrDefault();
-            return output;
+            return sqlDataAccess.LoadData<ProductModel, dynamic>("dbo.spProduct_GetById", new { Id = id }, "RMSData")
+                .FirstOrDefault();            
         }
     }
 }

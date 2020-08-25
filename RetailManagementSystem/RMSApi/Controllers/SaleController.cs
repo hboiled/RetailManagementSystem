@@ -16,22 +16,21 @@ namespace RMSApi.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class SaleController : ControllerBase
-    {
-        private readonly IConfiguration config;
+    {        
+        private readonly ISaleData saleData;
 
-        public SaleController(IConfiguration config)
-        {
-            this.config = config;
+        public SaleController(ISaleData saleData)
+        {            
+            this.saleData = saleData;
         }
 
         [Authorize(Roles = "Cashier")]
         [HttpPost]
         public void Post(SaleModel sale)
         {
-            SaleData data = new SaleData(config);
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            data.SaveSale(sale, userId);
+            saleData.SaveSale(sale, userId);
         }
 
 
@@ -40,10 +39,7 @@ namespace RMSApi.Controllers
         [HttpGet]
         public List<SaleReportModel> GetSalesReport()
         {
-
-            SaleData data = new SaleData(config);
-
-            return data.GetSaleReport();
+            return saleData.GetSaleReport();
         }
     }
 }

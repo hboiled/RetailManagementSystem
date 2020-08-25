@@ -9,31 +9,27 @@ using System.Threading.Tasks;
 
 namespace DataManager.Library.DataAccess
 {
-    public class InventoryData
+    public class InventoryData : IInventoryData
     {
         // IConfiguration is provided by net core by default for DI
-        private readonly IConfiguration config;
+        //private readonly IConfiguration config;
+        private readonly ISqlDataAccess sqlDataAccess;
 
-        public InventoryData(IConfiguration config)
+        public InventoryData(IConfiguration config, ISqlDataAccess sqlDataAccess)
         {
-            this.config = config;
+            //this.config = config;
+            this.sqlDataAccess = sqlDataAccess;
         }
 
         public List<InventoryModel> GetInventory()
         {
-            SqlDataAccess sql = new SqlDataAccess(config);
-
-            var output = sql.LoadData<InventoryModel, dynamic>("dbo.spInventory_GetAll", new { },
+            return sqlDataAccess.LoadData<InventoryModel, dynamic>("dbo.spInventory_GetAll", new { },
                 "RMSData");
-
-            return output;
         }
 
         public void SaveInventoryRecord(InventoryModel item)
         {
-            SqlDataAccess sql = new SqlDataAccess(config);
-
-            sql.SaveData<InventoryModel>("dbo.spInventory_Insert", item, "RMSData");
+            sqlDataAccess.SaveData<InventoryModel>("dbo.spInventory_Insert", item, "RMSData");
         }
     }
 }

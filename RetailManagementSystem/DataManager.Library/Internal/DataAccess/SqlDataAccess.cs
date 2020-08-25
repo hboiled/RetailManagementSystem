@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DataManager.Library.Internal.DataAccess
 {
-    internal class SqlDataAccess : IDisposable
+    public class SqlDataAccess : IDisposable, ISqlDataAccess
     {
 
         public SqlDataAccess(IConfiguration config)
@@ -34,7 +34,7 @@ namespace DataManager.Library.Internal.DataAccess
             {
                 List<T> rows = connection.Query<T>(storedProcedure, parameters,
                     commandType: CommandType.StoredProcedure).ToList();
-                
+
                 return rows;
             }
         }
@@ -56,7 +56,7 @@ namespace DataManager.Library.Internal.DataAccess
         public void StartTransaction(string connectionStringName)
         {
             string connectionString = GetConnectionString(connectionStringName);
-            
+
             _connection = new SqlConnection(connectionString);
             _connection.Open();
             _transaction = _connection.BeginTransaction();
@@ -68,17 +68,17 @@ namespace DataManager.Library.Internal.DataAccess
         {
             _connection.Execute(storedProcedure, parameters,
                     commandType: CommandType.StoredProcedure, transaction: _transaction);
-            
+
         }
 
         public List<T> LoadDataInTransaction<T, U>(string storedProcedure, U parameters)
         {
-            
+
             List<T> rows = _connection.Query<T>(storedProcedure, parameters,
                     commandType: CommandType.StoredProcedure, transaction: _transaction).ToList();
 
             return rows;
-            
+
         }
 
         private bool isClosed = false;

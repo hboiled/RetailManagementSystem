@@ -10,13 +10,15 @@ using System.Threading.Tasks;
 
 namespace DataManager.Library.DataAccess
 {
-    public class SaleData
+    public class SaleData : ISaleData
     {
-        private readonly IConfiguration config;
+        private readonly ISqlDataAccess sqlDataAccess;
+        private readonly IProductData productData;
 
-        public SaleData(IConfiguration config)
+        public SaleData(ISqlDataAccess sqlDataAccess, IProductData productData)
         {
-            this.config = config;
+            this.sqlDataAccess = sqlDataAccess;
+            this.productData = productData;
         }
 
         // Transactions in MSSQL should be done in one big chunk, otherwise there is a possibility
@@ -28,7 +30,7 @@ namespace DataManager.Library.DataAccess
 
             // Sale details models to be saved to db
             List<SaleDetailDBModel> saleDetails = new List<SaleDetailDBModel>();
-            ProductData products = new ProductData(config); // temporary instantiation
+            //ProductData products = new ProductData(config); // temporary instantiation
             var taxRate = ConfigHelper.GetTaxRate();
 
             foreach (var item in saleInfo.SaleDetails)
@@ -39,7 +41,7 @@ namespace DataManager.Library.DataAccess
                     Quantity = item.Quantity
                 };
 
-                var productInfo = products.GetProductById(item.ProductId);
+                var productInfo = productData.GetProductById(item.ProductId);
 
                 if (productInfo == null)
                 {
@@ -70,47 +72,42 @@ namespace DataManager.Library.DataAccess
             // operations on a set of data, act on it as though the database has consumed the changes
             // then submit all the changes as a batch to the database at once to ensure the transaction
             // is completed fully before being saved into the db
-            using(SqlDataAccess sql = new SqlDataAccess(config))
+            
+            try
             {
-                try
+                sqlDataAccess.StartTransaction("RMSData");
+
+                sqlDataAccess.SaveDataInTransaction<SaleDBModel>("dbo.spSale_Insert", sale);
+
+                sale.Id = sqlDataAccess.LoadDataInTransaction<int, dynamic>("spSale_Lookup", new
+                { sale.CashierId, sale.SaleDate })
+                    .FirstOrDefault();
+
+                // fill in sale detail models
+                foreach (var item in saleDetails)
                 {
-                    sql.StartTransaction("RMSData");
+                    // all items belong to this sale id
+                    item.SaleId = sale.Id;
 
-                    sql.SaveDataInTransaction<SaleDBModel>("dbo.spSale_Insert", sale);
-
-                    sale.Id = sql.LoadDataInTransaction<int, dynamic>("spSale_Lookup", new
-                    { sale.CashierId, sale.SaleDate })
-                        .FirstOrDefault();
-
-                    // fill in sale detail models
-                    foreach (var item in saleDetails)
-                    {
-                        // all items belong to this sale id
-                        item.SaleId = sale.Id;
-
-                        sql.SaveDataInTransaction("dbo.spSaleDetail_Insert", item);
-                    }
-
-                    sql.CommitTransaction();
-                }
-                catch
-                {
-                    sql.RollbackTransaction();
-                    throw;
+                    sqlDataAccess.SaveDataInTransaction("dbo.spSaleDetail_Insert", item);
                 }
 
-                
+                sqlDataAccess.CommitTransaction();
             }
+            catch
+            {
+                sqlDataAccess.RollbackTransaction();
+                throw;
+            }
+
+
+            
         }
 
         public List<SaleReportModel> GetSaleReport()
         {
-            SqlDataAccess sql = new SqlDataAccess(config);
-
-            var output = sql.LoadData<SaleReportModel, dynamic>("dbo.spSale_SaleReport", new { },
+            return sqlDataAccess.LoadData<SaleReportModel, dynamic>("dbo.spSale_SaleReport", new { },
                 "RMSData");
-
-            return output;
         }
     }
 }
